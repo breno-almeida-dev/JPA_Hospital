@@ -163,7 +163,7 @@ Configurações:
 
 JDBC URL: jdbc:h2:mem:hospitaldb  
 User: sa  
-Password: (vazio)
+Password: 123
 
 ---
 
