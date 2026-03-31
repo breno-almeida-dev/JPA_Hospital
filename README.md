@@ -179,30 +179,6 @@ Para executar este projeto em sua máquina, você precisará ter instalado:
 
 ---
 
-# 🔧 Instalação
-
-Clone este repositório:
-
-git clone https://github.com/SEU_USUARIO/NOME_DO_REPOSITORIO.git
-
-Entre na pasta do projeto:
-
-cd NOME_DO_REPOSITORIO
-
-Execute a aplicação:
-
-.\mvnw.cmd spring-boot:run
-
-Ou execute a classe principal:
-
-HospitalApplication.java
-
-Após iniciar o projeto, a aplicação ficará disponível em:
-
-http://localhost:8080
-
----
-
 # 🛠️ Construído com
 
 Tecnologias utilizadas neste projeto:
