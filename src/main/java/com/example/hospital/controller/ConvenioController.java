@@ -4,7 +4,8 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.example.hospital.model.Convenio;
+import com.example.hospital.dto.ConvenioRequestDTO;
+import com.example.hospital.dto.ConvenioResponseDTO;
 import com.example.hospital.service.ConvenioService;
 
 @RestController
@@ -18,23 +19,23 @@ public class ConvenioController {
     }
 
     @GetMapping
-    public List<Convenio> listarTodos() {
+    public List<ConvenioResponseDTO> listarTodos() {
         return service.listarTodos();
     }
 
     @GetMapping("/{id}")
-    public Convenio buscarPorId(@PathVariable Long id) {
+    public ConvenioResponseDTO buscarPorId(@PathVariable Long id) {
         return service.buscarPorId(id);
     }
 
     @PostMapping
-    public Convenio salvar(@RequestBody Convenio convenio) {
-        return service.salvar(convenio);
+    public ConvenioResponseDTO salvar(@RequestBody ConvenioRequestDTO dto) {
+        return service.salvar(dto);
     }
 
     @PutMapping("/{id}")
-    public Convenio atualizar(@PathVariable Long id, @RequestBody Convenio convenio) {
-        return service.atualizar(id, convenio);
+    public ConvenioResponseDTO atualizar(@PathVariable Long id, @RequestBody ConvenioRequestDTO dto) {
+        return service.atualizar(id, dto);
     }
 
     @DeleteMapping("/{id}")

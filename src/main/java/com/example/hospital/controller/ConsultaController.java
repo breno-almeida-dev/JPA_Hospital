@@ -4,7 +4,8 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.example.hospital.model.Consulta;
+import com.example.hospital.dto.ConsultaRequestDTO;
+import com.example.hospital.dto.ConsultaResponseDTO;
 import com.example.hospital.service.ConsultaService;
 
 @RestController
@@ -18,23 +19,23 @@ public class ConsultaController {
     }
 
     @GetMapping
-    public List<Consulta> listarTodos() {
+    public List<ConsultaResponseDTO> listarTodos() {
         return service.listarTodos();
     }
 
     @GetMapping("/{id}")
-    public Consulta buscarPorId(@PathVariable Long id) {
+    public ConsultaResponseDTO buscarPorId(@PathVariable Long id) {
         return service.buscarPorId(id);
     }
 
     @PostMapping
-    public Consulta salvar(@RequestBody Consulta consulta) {
-        return service.salvar(consulta);
+    public ConsultaResponseDTO salvar(@RequestBody ConsultaRequestDTO dto) {
+        return service.salvar(dto);
     }
 
     @PutMapping("/{id}")
-    public Consulta atualizar(@PathVariable Long id, @RequestBody Consulta consulta) {
-        return service.atualizar(id, consulta);
+    public ConsultaResponseDTO atualizar(@PathVariable Long id, @RequestBody ConsultaRequestDTO dto) {
+        return service.atualizar(id, dto);
     }
 
     @DeleteMapping("/{id}")

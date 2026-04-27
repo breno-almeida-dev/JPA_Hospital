@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.example.hospital.dto.PacienteRequestDTO;
+import com.example.hospital.dto.PacienteResponseDTO;
 import com.example.hospital.model.Paciente;
 import com.example.hospital.repository.PacienteRepository;
 
@@ -16,32 +18,49 @@ public class PacienteService {
         this.repository = repository;
     }
 
-    public List<Paciente> listarTodos() {
-        return repository.findAll();
+    public List<PacienteResponseDTO> listarTodos() {
+        return repository.findAll()
+                .stream()
+                .map(PacienteResponseDTO::new)
+                .toList();
     }
 
-    public Paciente buscarPorId(Long id) {
-        return repository.findById(id).orElse(null);
+    public PacienteResponseDTO buscarPorId(Long id) {
+        Paciente paciente = repository.findById(id).orElse(null);
+
+        if (paciente == null) {
+            return null;
+        }
+
+        return new PacienteResponseDTO(paciente);
     }
 
-    public Paciente salvar(Paciente paciente) {
-        return repository.save(paciente);
+    public PacienteResponseDTO salvar(PacienteRequestDTO dto) {
+        Paciente paciente = new Paciente();
+
+        paciente.setNome(dto.getNome());
+        paciente.setCpf(dto.getCpf());
+        paciente.setTelefone(dto.getTelefone());
+
+        Paciente pacienteSalvo = repository.save(paciente);
+
+        return new PacienteResponseDTO(pacienteSalvo);
     }
 
-    public Paciente atualizar(Long id, Paciente pacienteAtualizado) {
+    public PacienteResponseDTO atualizar(Long id, PacienteRequestDTO dto) {
         Paciente pacienteExistente = repository.findById(id).orElse(null);
 
         if (pacienteExistente == null) {
             return null;
         }
 
-        pacienteExistente.setNome(pacienteAtualizado.getNome());
-        pacienteExistente.setCpf(pacienteAtualizado.getCpf());
-        pacienteExistente.setTelefone(pacienteAtualizado.getTelefone());
-        pacienteExistente.setProntuario(pacienteAtualizado.getProntuario());
-        pacienteExistente.setConsultas(pacienteAtualizado.getConsultas());
+        pacienteExistente.setNome(dto.getNome());
+        pacienteExistente.setCpf(dto.getCpf());
+        pacienteExistente.setTelefone(dto.getTelefone());
 
-        return repository.save(pacienteExistente);
+        Paciente pacienteAtualizado = repository.save(pacienteExistente);
+
+        return new PacienteResponseDTO(pacienteAtualizado);
     }
 
     public boolean deletar(Long id) {

@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.example.hospital.dto.MedicoRequestDTO;
+import com.example.hospital.dto.MedicoResponseDTO;
 import com.example.hospital.model.Medico;
 import com.example.hospital.repository.MedicoRepository;
 
@@ -16,31 +18,49 @@ public class MedicoService {
         this.repository = repository;
     }
 
-    public List<Medico> listarTodos() {
-        return repository.findAll();
+    public List<MedicoResponseDTO> listarTodos() {
+        return repository.findAll()
+                .stream()
+                .map(MedicoResponseDTO::new)
+                .toList();
     }
 
-    public Medico buscarPorId(Long id) {
-        return repository.findById(id).orElse(null);
+    public MedicoResponseDTO buscarPorId(Long id) {
+        Medico medico = repository.findById(id).orElse(null);
+
+        if (medico == null) {
+            return null;
+        }
+
+        return new MedicoResponseDTO(medico);
     }
 
-    public Medico salvar(Medico medico) {
-        return repository.save(medico);
+    public MedicoResponseDTO salvar(MedicoRequestDTO dto) {
+        Medico medico = new Medico();
+
+        medico.setNome(dto.getNome());
+        medico.setEspecialidade(dto.getEspecialidade());
+        medico.setCrm(dto.getCrm());
+
+        Medico medicoSalvo = repository.save(medico);
+
+        return new MedicoResponseDTO(medicoSalvo);
     }
 
-    public Medico atualizar(Long id, Medico medicoAtualizado) {
+    public MedicoResponseDTO atualizar(Long id, MedicoRequestDTO dto) {
         Medico medicoExistente = repository.findById(id).orElse(null);
 
         if (medicoExistente == null) {
             return null;
         }
 
-        medicoExistente.setNome(medicoAtualizado.getNome());
-        medicoExistente.setEspecialidade(medicoAtualizado.getEspecialidade());
-        medicoExistente.setCrm(medicoAtualizado.getCrm());
-        medicoExistente.setConsultas(medicoAtualizado.getConsultas());
+        medicoExistente.setNome(dto.getNome());
+        medicoExistente.setEspecialidade(dto.getEspecialidade());
+        medicoExistente.setCrm(dto.getCrm());
 
-        return repository.save(medicoExistente);
+        Medico medicoAtualizado = repository.save(medicoExistente);
+
+        return new MedicoResponseDTO(medicoAtualizado);
     }
 
     public boolean deletar(Long id) {

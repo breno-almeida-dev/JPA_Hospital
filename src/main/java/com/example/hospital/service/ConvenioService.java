@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.example.hospital.dto.ConvenioRequestDTO;
+import com.example.hospital.dto.ConvenioResponseDTO;
 import com.example.hospital.model.Convenio;
 import com.example.hospital.repository.ConvenioRepository;
 
@@ -16,30 +18,47 @@ public class ConvenioService {
         this.repository = repository;
     }
 
-    public List<Convenio> listarTodos() {
-        return repository.findAll();
+    public List<ConvenioResponseDTO> listarTodos() {
+        return repository.findAll()
+                .stream()
+                .map(ConvenioResponseDTO::new)
+                .toList();
     }
 
-    public Convenio buscarPorId(Long id) {
-        return repository.findById(id).orElse(null);
+    public ConvenioResponseDTO buscarPorId(Long id) {
+        Convenio convenio = repository.findById(id).orElse(null);
+
+        if (convenio == null) {
+            return null;
+        }
+
+        return new ConvenioResponseDTO(convenio);
     }
 
-    public Convenio salvar(Convenio convenio) {
-        return repository.save(convenio);
+    public ConvenioResponseDTO salvar(ConvenioRequestDTO dto) {
+        Convenio convenio = new Convenio();
+
+        convenio.setNome(dto.getNome());
+        convenio.setCnpj(dto.getCnpj());
+
+        Convenio convenioSalvo = repository.save(convenio);
+
+        return new ConvenioResponseDTO(convenioSalvo);
     }
 
-    public Convenio atualizar(Long id, Convenio convenioAtualizado) {
+    public ConvenioResponseDTO atualizar(Long id, ConvenioRequestDTO dto) {
         Convenio convenioExistente = repository.findById(id).orElse(null);
 
         if (convenioExistente == null) {
             return null;
         }
 
-        convenioExistente.setNome(convenioAtualizado.getNome());
-        convenioExistente.setCnpj(convenioAtualizado.getCnpj());
-        convenioExistente.setConsultas(convenioAtualizado.getConsultas());
+        convenioExistente.setNome(dto.getNome());
+        convenioExistente.setCnpj(dto.getCnpj());
 
-        return repository.save(convenioExistente);
+        Convenio convenioAtualizado = repository.save(convenioExistente);
+
+        return new ConvenioResponseDTO(convenioAtualizado);
     }
 
     public boolean deletar(Long id) {

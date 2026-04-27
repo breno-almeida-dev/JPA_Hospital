@@ -4,43 +4,73 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.example.hospital.dto.ProntuarioRequestDTO;
+import com.example.hospital.dto.ProntuarioResponseDTO;
+import com.example.hospital.model.Paciente;
 import com.example.hospital.model.Prontuario;
+import com.example.hospital.repository.PacienteRepository;
 import com.example.hospital.repository.ProntuarioRepository;
 
 @Service
 public class ProntuarioService {
 
     private final ProntuarioRepository repository;
+    private final PacienteRepository pacienteRepository;
 
-    public ProntuarioService(ProntuarioRepository repository) {
+    public ProntuarioService(ProntuarioRepository repository, PacienteRepository pacienteRepository) {
         this.repository = repository;
+        this.pacienteRepository = pacienteRepository;
     }
 
-    public List<Prontuario> listarTodos() {
-        return repository.findAll();
+    public List<ProntuarioResponseDTO> listarTodos() {
+        return repository.findAll()
+                .stream()
+                .map(ProntuarioResponseDTO::new)
+                .toList();
     }
 
-    public Prontuario buscarPorId(Long id) {
-        return repository.findById(id).orElse(null);
+    public ProntuarioResponseDTO buscarPorId(Long id) {
+        Prontuario prontuario = repository.findById(id).orElse(null);
+
+        if (prontuario == null) {
+            return null;
+        }
+
+        return new ProntuarioResponseDTO(prontuario);
     }
 
-    public Prontuario salvar(Prontuario prontuario) {
-        return repository.save(prontuario);
+    public ProntuarioResponseDTO salvar(ProntuarioRequestDTO dto) {
+        Prontuario prontuario = new Prontuario();
+
+        prontuario.setTipoSanguineo(dto.getTipoSanguineo());
+        prontuario.setAlergia(dto.getAlergia());
+        prontuario.setObservacoes(dto.getObservacoes());
+
+        Paciente paciente = pacienteRepository.findById(dto.getPacienteId()).orElse(null);
+        prontuario.setPaciente(paciente);
+
+        Prontuario prontuarioSalvo = repository.save(prontuario);
+
+        return new ProntuarioResponseDTO(prontuarioSalvo);
     }
 
-    public Prontuario atualizar(Long id, Prontuario prontuarioAtualizado) {
+    public ProntuarioResponseDTO atualizar(Long id, ProntuarioRequestDTO dto) {
         Prontuario prontuarioExistente = repository.findById(id).orElse(null);
 
         if (prontuarioExistente == null) {
             return null;
         }
 
-        prontuarioExistente.setTipoSanguineo(prontuarioAtualizado.getTipoSanguineo());
-        prontuarioExistente.setAlergia(prontuarioAtualizado.getAlergia());
-        prontuarioExistente.setObservacoes(prontuarioAtualizado.getObservacoes());
-        prontuarioExistente.setPaciente(prontuarioAtualizado.getPaciente());
+        prontuarioExistente.setTipoSanguineo(dto.getTipoSanguineo());
+        prontuarioExistente.setAlergia(dto.getAlergia());
+        prontuarioExistente.setObservacoes(dto.getObservacoes());
 
-        return repository.save(prontuarioExistente);
+        Paciente paciente = pacienteRepository.findById(dto.getPacienteId()).orElse(null);
+        prontuarioExistente.setPaciente(paciente);
+
+        Prontuario atualizado = repository.save(prontuarioExistente);
+
+        return new ProntuarioResponseDTO(atualizado);
     }
 
     public boolean deletar(Long id) {
