@@ -24,6 +24,10 @@ public class Receita {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getMedicamento() {
         return medicamento;
     }
