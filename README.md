@@ -1,8 +1,8 @@
-# 🏥 Sistema Hospitalar - API REST com Spring Boot, DTO e PostgreSQL
+# 🏥 Sistema Hospitalar - API REST com Spring Boot, DTO, Exceptions, Bean e PostgreSQL
 
 Este projeto foi desenvolvido em **Java com Spring Boot** como parte das atividades práticas da disciplina de **Back-End**.
 
-O objetivo principal é simular um **sistema hospitalar**, aplicando conceitos fundamentais de desenvolvimento de APIs REST, arquitetura em camadas, persistência com JPA/Hibernate, uso de DTOs e integração com banco de dados PostgreSQL em nuvem utilizando o **Neon Serverless Postgres**.
+O objetivo principal é simular um **sistema hospitalar**, aplicando conceitos fundamentais de desenvolvimento de APIs REST, arquitetura em camadas, persistência com JPA/Hibernate, uso de DTOs, tratamento global de exceções, construção de objetos com `@Bean` e integração com banco de dados PostgreSQL em nuvem utilizando o **Neon Serverless Postgres**.
 
 ---
 
@@ -23,6 +23,15 @@ A API permite realizar operações de **CRUD completo** para as entidades do sis
 Controller → DTO → Service → Repository → Banco de Dados
 ```
 
+Além do CRUD, o projeto também possui:
+
+- Tratamento global de erros com `@ControllerAdvice`
+- Classe personalizada de erro `APIErrorDTO`
+- Exception personalizada `RegraNegocioException`
+- Configuração de objetos com `@Configuration`
+- Criação automática de objetos com `@Bean`
+- Endpoint específico para validar um objeto hospitalar completo criado pelo Spring
+
 ---
 
 ## 🧠 Evolução do Projeto
@@ -37,6 +46,10 @@ Na versão atual, o projeto foi evoluído para uma estrutura mais próxima de um
 - Services responsáveis pela regra de negócio
 - Repositories para persistência
 - Entidades JPA relacionadas entre si
+- Tratamento global de exceções
+- Padronização de respostas de erro
+- Beans configurados manualmente pelo Spring
+- Injeção de dependência para montar objetos completos do domínio hospitalar
 
 ---
 
@@ -47,7 +60,12 @@ O projeto segue uma arquitetura em camadas:
 ```text
 src/main/java/com/example/hospital
 │
+├── config
+│   ├── ApplicationControllerAdvice.java
+│   └── HospitalConfiguration.java
+│
 ├── controller
+│   ├── BeanController.java
 │   ├── PacienteController.java
 │   ├── MedicoController.java
 │   ├── ConvenioController.java
@@ -68,6 +86,10 @@ src/main/java/com/example/hospital
 │   ├── ConsultaResponseDTO.java
 │   ├── ReceitaRequestDTO.java
 │   └── ReceitaResponseDTO.java
+│
+├── exception
+│   ├── APIErrorDTO.java
+│   └── RegraNegocioException.java
 │
 ├── model
 │   ├── Paciente.java
@@ -278,6 +300,159 @@ Foram criados dois tipos principais de DTO para cada entidade:
 
 ---
 
+## ⚠️ Tratamento Global de Exceptions
+
+O projeto possui tratamento global de erros utilizando a classe:
+
+```text
+src/main/java/com/example/hospital/config/ApplicationControllerAdvice.java
+```
+
+Essa classe utiliza `@ControllerAdvice`, permitindo interceptar exceções lançadas pela aplicação e retornar respostas padronizadas para o cliente.
+
+### Exceptions tratadas
+
+- `RegraNegocioException`
+- `MethodArgumentNotValidException`
+- `Exception`
+
+### Exemplo de resposta de erro
+
+```json
+{
+  "erros": [
+    "Paciente não encontrado"
+  ]
+}
+```
+
+---
+
+## 📦 APIErrorDTO
+
+A classe `APIErrorDTO` é responsável por padronizar o formato das mensagens de erro retornadas pela API.
+
+Arquivo:
+
+```text
+src/main/java/com/example/hospital/exception/APIErrorDTO.java
+```
+
+Ela armazena uma lista de mensagens de erro, permitindo que a API retorne uma resposta mais organizada.
+
+Exemplo:
+
+```json
+{
+  "erros": [
+    "Campo nome é obrigatório",
+    "Campo CPF é obrigatório"
+  ]
+}
+```
+
+---
+
+## 🛑 RegraNegocioException
+
+A classe `RegraNegocioException` é uma exception personalizada criada para representar erros relacionados às regras de negócio do sistema.
+
+Arquivo:
+
+```text
+src/main/java/com/example/hospital/exception/RegraNegocioException.java
+```
+
+Ela pode ser utilizada nos Services quando alguma regra do sistema não for atendida.
+
+Exemplo de uso:
+
+```java
+throw new RegraNegocioException("Paciente não encontrado");
+```
+
+---
+
+## 🌱 Construção de Objetos com @Bean
+
+O projeto também implementa uma atividade prática utilizando `@Configuration` e `@Bean`.
+
+O objetivo dessa implementação é fazer o Spring criar automaticamente um objeto completo do domínio hospitalar.
+
+Arquivo responsável:
+
+```text
+src/main/java/com/example/hospital/config/HospitalConfiguration.java
+```
+
+Essa classe é anotada com:
+
+```java
+@Configuration
+```
+
+Dentro dela, são criados métodos anotados com:
+
+```java
+@Bean
+```
+
+Esses métodos permitem que o Spring gerencie objetos como Beans dentro do seu container.
+
+---
+
+## 🧩 Paciente Completo Montado pelo Spring
+
+A configuração com `@Bean` faz o Spring montar automaticamente um objeto `Paciente` completo, contendo seus relacionamentos preenchidos.
+
+O objeto criado possui:
+
+- Paciente
+- Prontuário
+- Consulta
+- Médico
+- Convênio
+- Receita
+
+Dessa forma, o Spring realiza a injeção de dependência entre os objetos criados na classe `HospitalConfiguration`.
+
+Representação geral:
+
+```text
+Paciente
+│
+├── Prontuário
+│
+└── Consulta
+    ├── Médico
+    ├── Convênio
+    └── Receita
+```
+
+---
+
+## 🔌 BeanController
+
+O projeto possui um controller específico para testar o Bean criado pelo Spring.
+
+Arquivo:
+
+```text
+src/main/java/com/example/hospital/controller/BeanController.java
+```
+
+Esse controller recebe o objeto `Paciente` por injeção de dependência e disponibiliza um endpoint para visualizar o objeto completo.
+
+Endpoint:
+
+```http
+GET /bean/paciente
+```
+
+Esse endpoint permite validar se o Spring conseguiu montar automaticamente o objeto hospitalar completo com seus relacionamentos.
+
+---
+
 ## ☁️ Banco de Dados
 
 A versão atual do projeto utiliza **Neon Serverless Postgres**, um banco PostgreSQL em nuvem.
@@ -320,6 +495,12 @@ A URL base da aplicação local é:
 
 ```text
 http://localhost:8080
+```
+
+Para testar os endpoints, é recomendado configurar no Postman:
+
+```text
+Content-Type: application/json
 ```
 
 ---
@@ -462,6 +643,16 @@ Exemplo de JSON para cadastro:
 
 ---
 
+### Bean Spring
+
+```http
+GET /bean/paciente
+```
+
+Esse endpoint retorna um objeto `Paciente` criado automaticamente pelo Spring através de `@Bean`.
+
+---
+
 ## ✅ Ordem Recomendada para Testes
 
 Como algumas entidades dependem de outras, recomenda-se testar a API nesta ordem:
@@ -473,9 +664,10 @@ Como algumas entidades dependem de outras, recomenda-se testar a API nesta ordem
 4. Prontuário
 5. Consulta
 6. Receita
+7. Bean Spring
 ```
 
-Essa ordem garante que os IDs necessários para os relacionamentos já existam no banco de dados.
+Essa ordem garante que os IDs necessários para os relacionamentos já existam no banco de dados e também permite validar o endpoint criado para testar o Bean.
 
 ---
 
@@ -484,10 +676,16 @@ Essa ordem garante que os IDs necessários para os relacionamentos já existam n
 ### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/seu-repositorio.git
+git clone https://github.com/breno-almeida-dev/JPA_Hospital.git
 ```
 
 ### 2. Acessar a pasta do projeto
+
+```bash
+cd JPA_Hospital
+```
+
+Caso o projeto esteja dentro de uma subpasta, acesse:
 
 ```bash
 cd hospital
@@ -573,12 +771,20 @@ Este projeto aplica os seguintes conceitos de desenvolvimento Back-End:
 - Uso de controllers
 - Integração com banco de dados em nuvem
 - Testes de endpoints com Postman
+- Tratamento global de exceções
+- Criação de exceptions personalizadas
+- Padronização de respostas de erro
+- Uso de `@ControllerAdvice`
+- Uso de `@Configuration`
+- Uso de `@Bean`
+- Inversão de Controle
+- Injeção de Dependência
 
 ---
 
 ## 📌 Versão Atual
 
-### Versão 2.0
+### Versão 3.0
 
 Esta versão representa a evolução do projeto para uma estrutura mais robusta, utilizando:
 
@@ -588,6 +794,13 @@ Esta versão representa a evolução do projeto para uma estrutura mais robusta,
 - CRUD completo para as principais entidades
 - Relacionamentos JPA entre as tabelas
 - Organização em camadas
+- Tratamento global de Exceptions
+- Classe `APIErrorDTO`
+- Exception personalizada `RegraNegocioException`
+- Configuração com `@Configuration`
+- Construção de objetos com `@Bean`
+- Controller específico para testar Bean do Spring
+- Endpoint `/bean/paciente`
 
 ---
 
@@ -595,4 +808,4 @@ Esta versão representa a evolução do projeto para uma estrutura mais robusta,
 
 **Breno Gustavo Rocha de Almeida**
 
-Projeto desenvolvido como atividade prática da disciplina de **Back-End**, com foco no aprendizado de Spring Boot, JPA, DTO, arquitetura REST e integração com banco de dados relacional em nuvem.
+Projeto desenvolvido como atividade prática da disciplina de **Back-End**, com foco no aprendizado de Spring Boot, JPA, DTO, arquitetura REST, tratamento global de exceções, criação de Beans com Spring e integração com banco de dados relacional em nuvem.
